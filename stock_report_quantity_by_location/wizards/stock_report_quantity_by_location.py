@@ -1,6 +1,6 @@
 # Copyright 2019 Eficent Business and IT Consulting Services, S.L.
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-from odoo import fields, models, _
+from openerp import api, fields, models, _
 
 
 class StockReportByLocationPrepare(models.TransientModel):
@@ -11,6 +11,7 @@ class StockReportByLocationPrepare(models.TransientModel):
                                     string='Locations',
                                     required=True)
 
+    @api.multi
     def open(self):
         self.ensure_one()
         self._compute_stock_report_by_location()
@@ -35,7 +36,7 @@ class StockReportByLocationPrepare(models.TransientModel):
                 ['product_id'])
             mapping = dict(
                 [(quant_group['product_id'][0],
-                  quant_group['quantity'])
+                  quant_group.get('quantity', 0))
                  for quant_group in quant_groups]
             )
             products = self.env['product.product'].search(
