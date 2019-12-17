@@ -14,6 +14,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
                     <group>
                         <group>
                             <field name="location_ids" widget="many2many_tags"/>
+                            <field name="sub_locations"/>
                         </group>
                     </group>
                     <footer>

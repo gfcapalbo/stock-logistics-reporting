@@ -10,10 +10,17 @@ class StockReportByLocationPrepare(models.TransientModel):
     location_ids = fields.Many2many(comodel_name='stock.location',
                                     string='Locations',
                                     required=True)
+    sub_locations = fields.Boolean(string='Include Sub Locations',
+                                   default=False)
 
     @api.multi
     def open(self):
         self.ensure_one()
+        to_add_locations = []
+        if self.sub_locations:
+            for location in self.location_ids:
+                to_add_locations.extend(location._get_sublocations())
+            self.write({'location_ids': [(4, to_add_locations)]})
         self._compute_stock_report_by_location()
         action = {
             'type': 'ir.actions.act_window',
@@ -32,11 +39,11 @@ class StockReportByLocationPrepare(models.TransientModel):
         for loc in self.location_ids:
             quant_groups = self.env['stock.quant'].read_group(
                 [('location_id', 'child_of', [loc.id])],
-                ['quantity', 'product_id'],
+                ['qty', 'product_id'],
                 ['product_id'])
             mapping = dict(
                 [(quant_group['product_id'][0],
-                  quant_group.get('quantity', 0))
+                  quant_group.get('qty', 0))
                  for quant_group in quant_groups]
             )
             products = self.env['product.product'].search(
